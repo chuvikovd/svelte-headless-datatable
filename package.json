@@ -1,0 +1,48 @@
+{
+  "name": "svelte-headless-datatable",
+  "version": "0.1.0",
+  "description": "Headless Svelte 3 datatable",
+  "author": "Dmitrijs Čuvikovs <chuvikovd@gmail.com> (https://chuva.dev)",
+  "repository": "???",
+  "homepage": "???",
+  "keywords": [
+    "svelte",
+    "datatable"
+  ],
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "format": "prettier-standard --format",
+    "lint": "prettier-standard --lint",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "svelte": ">=3.20.0"
+  },
+  "dependencies": {
+    "multi-column-sort": "^1.0.2"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "babel-jest": "^25.1.0",
+    "husky": "^4.2.3",
+    "jest": "^25.1.0",
+    "prettier-config-standard": "^1.0.1",
+    "prettier-standard": "^16.2.1",
+    "standard": "^14.3.3",
+    "svelte": "^3.0.0",
+    "wait-for-expect": "^3.0.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier-standard --format -- lint",
+      "git add"
+    ]
+  }
+}
