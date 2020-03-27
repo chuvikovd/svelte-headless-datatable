@@ -225,7 +225,7 @@ describe('datatable', () => {
       expect(get(sort)).toEqual([])
 
       setSort('firstName')()
-      expect(get(sort)).toEqual(['firstName-asc'])
+      expect(get(sort)).toEqual([['firstName', 'ASC']])
       await waitForExpect(() => {
         expect(get(items)).toEqual([data[0], data[2], data[3], data[1]])
       }, 1)
@@ -236,7 +236,7 @@ describe('datatable', () => {
 
       setSort('firstName')()
       setSort('firstName')()
-      expect(get(sort)).toEqual(['firstName-desc'])
+      expect(get(sort)).toEqual([['firstName', 'DESC']])
       await waitForExpect(() => {
         expect(get(items)).toEqual([data[1], data[3], data[0], data[2]])
       }, 1)
@@ -248,7 +248,10 @@ describe('datatable', () => {
 
         setSort('firstName')({ shiftKey: true })
         setSort('balance')({ shiftKey: true })
-        expect(get(sort)).toEqual(['firstName-asc', 'balance-asc'])
+        expect(get(sort)).toEqual([
+          ['firstName', 'ASC'],
+          ['balance', 'ASC']
+        ])
         await waitForExpect(() => {
           expect(get(items)).toEqual([data[2], data[0], data[3], data[1]])
         }, 1)
@@ -260,7 +263,10 @@ describe('datatable', () => {
         setSort('firstName')({ shiftKey: true })
         setSort('balance')({ shiftKey: true })
         setSort('balance')({ shiftKey: true })
-        expect(get(sort)).toEqual(['firstName-asc', 'balance-desc'])
+        expect(get(sort)).toEqual([
+          ['firstName', 'ASC'],
+          ['balance', 'DESC']
+        ])
         await waitForExpect(() => {
           expect(get(items)).toEqual([data[0], data[2], data[3], data[1]])
         }, 1)
@@ -271,10 +277,13 @@ describe('datatable', () => {
 
         setSort('id')({ shiftKey: true })
         setSort('firstName')({ shiftKey: true })
-        expect(get(sort)).toEqual(['id-asc', 'firstName-asc'])
+        expect(get(sort)).toEqual([
+          ['id', 'ASC'],
+          ['firstName', 'ASC']
+        ])
 
         setSort('firstName')()
-        expect(get(sort)).toEqual(['firstName-asc'])
+        expect(get(sort)).toEqual([['firstName', 'ASC']])
         await waitForExpect(() => {
           expect(get(items)).toEqual([data[0], data[2], data[3], data[1]])
         }, 1)

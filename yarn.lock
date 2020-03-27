@@ -4259,10 +4259,10 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-multi-column-sort@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/multi-column-sort/-/multi-column-sort-1.0.2.tgz#6d8eb222e88c85b59688dbfa5f20f502481869fb"
-  integrity sha512-DpYlzhq/NrXHxj/5U+TOwM6Nw6FqwIuNXSbff1qkQ4fvoElebitkK7UIDC5e217ubQG3S5qawI+q70TjWuyXPQ==
+multi-column-sort@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/multi-column-sort/-/multi-column-sort-2.0.0.tgz#cbc4043e09e8441376f88504c0e8ebc5b9b0368a"
+  integrity sha512-n/czzgUv7a43Qda0ksEEHEp+qfKfqNh1h4VIrRNB0dhIBYjYghXITx3vRZCEnzQ3N8Jgw46SScpZIjJiiyWZHQ==
 
 multimatch@^3.0.0:
   version "3.0.0"

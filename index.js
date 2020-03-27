@@ -93,26 +93,22 @@ export default (initialData = [], options = {}) => {
 
   const setSort = column => ({ shiftKey } = {}) =>
     sort.update(store => {
-      const index = store.findIndex(item => item.includes(column))
+      const index = store.findIndex(item => item[0] === column)
       const reverse =
-        index > -1
-          ? store[index].split('-')[1] === 'asc'
-            ? 'desc'
-            : 'asc'
-          : null
+        index > -1 ? (store[index][1] === 'ASC' ? 'DESC' : 'ASC') : null
 
       if (shiftKey) {
         if (index > -1) {
           return (store = [
             ...store.slice(0, index),
-            `${column}-${reverse}`,
+            [column, reverse],
             ...store.slice(index + 1)
           ])
-        } else return (store = [...store, `${column}-asc`])
+        } else return (store = [...store, [column, 'ASC']])
       } else {
         if (store.length === 1 && !index) {
-          return (store = [`${column}-${reverse}`])
-        } else return (store = [`${column}-asc`])
+          return (store = [[column, reverse]])
+        } else return (store = [[column, 'ASC']])
       }
     })
 
