@@ -1,9 +1,16 @@
 import { get } from 'svelte/store'
-import initDatatable from './index'
+import waitForExpect from 'wait-for-expect'
+import initDatatable from './Datatable'
+import { Datatable } from './types'
 import data from './data.json'
 
 describe('datatable', () => {
-  let datatable
+  interface Data {
+    id: string
+    name: string
+  }
+
+  let datatable: Datatable<Data>
 
   beforeEach(() => {
     datatable = initDatatable(data)
@@ -179,7 +186,15 @@ describe('datatable', () => {
   })
 
   describe('sorting', () => {
-    const data = [
+    interface Data {
+      id: string
+      firstName: string
+      lastName: string
+      balance: string
+    }
+
+    let datatable: Datatable<Data>
+    const data: Data[] = [
       {
         id: '5e734a7a414a593f9089fea6',
         firstName: 'Bailey',
@@ -292,7 +307,7 @@ describe('datatable', () => {
   })
 
   describe('async', () => {
-    const getData = ({ offset, limit }) =>
+    const getData = ({ offset, limit }): Promise<Data[]> =>
       new Promise(resolve =>
         setTimeout(() => resolve(data.slice(offset, offset + limit)), 500)
       )
