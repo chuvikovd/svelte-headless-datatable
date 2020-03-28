@@ -12,15 +12,17 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "format": "prettier-standard --format",
     "lint": "prettier-standard --lint",
-    "test": "jest"
+    "test": "jest",
+    "doc": "yarn typedoc && echo > ./docs/.nojekyll"
   },
   "peerDependencies": {
     "svelte": ">=3.20.0"
   },
   "dependencies": {
-    "multi-column-sort": "^2.0.0"
+    "multi-column-sort": "^2.1.0"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
@@ -31,6 +33,7 @@
     "standard": "^14.3.3",
     "svelte": "^3.0.0",
     "ts-jest": "^25.2.1",
+    "typedoc": "^0.17.3",
     "typescript": "^3.8.3",
     "wait-for-expect": "^3.0.2"
   },

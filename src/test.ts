@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import waitForExpect from 'wait-for-expect'
-import initDatatable from './Datatable'
+import initDatatable from '.'
 import { Datatable } from './types'
 import data from './data.json'
 

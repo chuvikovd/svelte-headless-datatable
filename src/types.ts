@@ -1,113 +1,87 @@
 import { Writable, Readable } from 'svelte/store'
+import { SortArray, GetColumnValue } from 'multi-column-sort'
 
 /**
  * Interface data object should extend
  */
-export interface D {
+export interface TDefaultData {
   id: string
 }
 
-/**
- * Store with checked item ids
- */
-export type Checked<T extends D> = Writable<T['id'][]>
-
-/**
- * Store with flag indicating all items are checked
- */
-export type AllChecked = Readable<boolean>
-
-/**
- * Method for checking/unchecking item
- * @param id id of item
- */
-export type Check<T extends D> = (id: T['id']) => void
-
-/**
- * Method for checking/unchecking all items
- */
-export type CheckAll = () => void
-
-/**
- * Store with opened item ids
- */
-export type Opened<T extends D> = Writable<T['id'][]>
-
-/**
- * Method for opening/closing item
- * @param id id of item
- */
-export type Open<T extends D> = (id: T['id']) => void
-
-/**
- * Store with selected item ids
- */
-export type Selected<T extends D> = Writable<T['id'][]>
-
-/**
- * Method for selecting/deselecting item
- * @param id id of item
- */
-export type Select<T extends D> = (id: T['id']) => void
-
-/**
- * Store with loading state
- */
-export type Loading = Writable<boolean>
-
-/**
- * Store with current page
- */
-export type Page = Writable<number>
-
-/**
- * Store with pages total count
- */
-export type Pages = Readable<number>
-
-/**
- * Store with items currently shown
- */
-export type Items<T extends D> = Readable<T[]>
-
-/**
- * Store with current sorting order
- */
-export type Sort<T extends D> = Writable<[keyof T, 'ASC' | 'DESC'][]>
-
-/**
- * Method for changing sort
- * @param column column
- * @returns Method to be executed with optional `MouseEvent` param
- *
- * Example:
- * ```svelte
- * <td on:click={setSort('city')}>City</td>
- * ```
- */
-export type SetSort<T extends D> = (
-  column: keyof T
-) => ({ shiftKey }?: { shiftKey: MouseEvent['shiftKey'] }) => void
-
-export interface Datatable<T extends D = D> {
-  checked: Checked<T>
-  allChecked: AllChecked
-  check: Check<T>
-  checkAll: CheckAll
-  opened: Opened<T>
-  open: Open<T>
-  selected: Selected<T>
-  select: Select<T>
-  loading: Loading
-  page: Page
-  pages: Pages
-  items: Items<T>
-  sort: Sort<T>
-  setSort: SetSort<T>
+export interface Datatable<TData extends TDefaultData = TDefaultData> {
+  /**
+   * Store with checked item ids
+   */
+  checked: Writable<TData['id'][]>
+  /**
+   * Store with flag indicating all items are checked
+   */
+  allChecked: Readable<boolean>
+  /**
+   * Method for checking/unchecking item
+   * @param id id of item
+   */
+  check: (id: TData['id']) => void
+  /**
+   * Method for checking/unchecking all items
+   */
+  checkAll: () => void
+  /**
+   * Store with opened item ids
+   */
+  opened: Writable<TData['id'][]>
+  /**
+   * Method for opening/closing item
+   * @param id id of item
+   */
+  open: (id: TData['id']) => void
+  /**
+   * Store with selected item ids
+   */
+  selected: Writable<TData['id'][]>
+  /**
+   * Method for selecting/deselecting item
+   * @param id id of item
+   */
+  select: (id: TData['id']) => void
+  /**
+   * Store with loading state
+   */
+  loading: Writable<boolean>
+  /**
+   * Store with current page
+   */
+  page: Writable<number>
+  /**
+   * Store with pages total count
+   */
+  pages: Readable<number>
+  /**
+   * Store with items currently shown
+   */
+  items: Readable<TData[]>
+  /**
+   * Store with current sorting order.
+   * See https://github.com/chuvikovd/multi-column-sort
+   */
+  sort: Writable<SortArray<TData>>
+  /**
+   * Method for changing sort
+   * @param column column
+   * @returns Method to be executed with optional `MouseEvent` param
+   *
+   * Example:
+   * ```html
+   * <td on:click={setSort('city')}>City</td>
+   * ```
+   */
+  setSort: (
+    column: keyof TData
+  ) => ({ shiftKey }?: { shiftKey: MouseEvent['shiftKey'] }) => void
 }
 
-export interface GetItemsArgs<T> {
-  data?: T[]
+export interface GetItemsArgs<TData> {
+  data?: TData[]
   itemsPerPage: number
 }
 
@@ -116,23 +90,34 @@ export interface GetItemsArgs<T> {
  * @param page current page number
  * @param getItemArgs object: `GetItemArgs`
  */
-export type GetItems<T> = (
+export type GetItems<TData> = (
   page: number,
-  { data, itemsPerPage }: GetItemsArgs<T>
-) => T[] | Promise<T[]>
-
-/**
- * Method to get column value for comparison
- */
-export type GetColumnValue<T> = (column: keyof T, value: T[keyof T]) => any
+  { data, itemsPerPage }: GetItemsArgs<TData>
+) => TData[] | Promise<TData[]>
 
 /**
  * Configuration options object
  */
-export interface Options<T extends D> {
+export interface Options<TData extends TDefaultData> {
+  /**
+   * Allow open multiple items
+   */
   openMultiple?: boolean
+  /**
+   * Allow select multple items
+   */
   selectMultiple?: boolean
+  /**
+   * Item per page count
+   */
   itemsPerPage?: number
-  getItems?: GetItems<T>
-  getColumnValue?: GetColumnValue<T>
+  /**
+   * Method to get current page items. Can be async.
+   */
+  getItems?: GetItems<TData>
+  /**
+   * Method for retrieving column value for comparison.
+   * See https://github.com/chuvikovd/multi-column-sort
+   */
+  getColumnValue?: GetColumnValue<TData>
 }
