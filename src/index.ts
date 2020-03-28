@@ -1,15 +1,26 @@
 import { derived, get, writable } from 'svelte/store'
 import multiColumnSort from 'multi-column-sort'
+import { TDefaultData, Datatable, Options } from './types'
 
-const defaultOptions = {
+/**
+ * @hidden
+ */
+const getDefaultOptions = <TData extends TDefaultData>(): Options<TData> => ({
   openMultiple: false,
   selectMultiple: false,
   itemsPerPage: 10,
   getItems: (page, { data, itemsPerPage }) =>
     data.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
-}
+})
 
-export default (initialData = [], options = {}) => {
+/**
+ * Initialize datatable
+ * @param initialData data. Pass [] if async
+ * @param options configuration object
+ */
+export default function createDatatable<
+  TData extends TDefaultData = TDefaultData
+> (initialData: TData[] = [], options: Options<TData> = {}): Datatable<TData> {
   const {
     openMultiple,
     selectMultiple,
@@ -17,45 +28,45 @@ export default (initialData = [], options = {}) => {
     getItems,
     getColumnValue
   } = {
-    ...defaultOptions,
+    ...(<TData>getDefaultOptions()),
     ...options
   }
 
-  const sort = writable([])
+  const sort = writable<[keyof TData, 'ASC' | 'DESC'][]>([])
   const data = derived(
     sort,
-    $sort => {
-      if (!$sort.length) return initialData
+    ($sort, set) => {
+      if (!$sort.length) return set(initialData)
 
-      return multiColumnSort(initialData, $sort, getColumnValue)
+      set(multiColumnSort(initialData, $sort, getColumnValue))
     },
     initialData
   )
-  const checked = writable([])
+  const checked = writable<string[]>([])
   const allChecked = derived(
     [checked, data],
     ([$checked, $data]) => $checked.length === $data.length
   )
-  const opened = writable([])
-  const selected = writable([])
+  const opened = writable<string[]>([])
+  const selected = writable<string[]>([])
   const loading = writable(options.getItems ? true : false)
   const page = writable(0)
   const pages = derived(data, $data => Math.ceil($data.length / itemsPerPage))
   const items = derived(
     [page, data],
-    async ([$page, $data], set) => {
+    (async ([$page, $data], set) => {
       loading.set(true)
 
       const result = await getItems($page, { data: $data, itemsPerPage })
       loading.set(false)
-      set(result)
-    },
+      set(result as TData[])
+    }) as any,
     initialData
   )
 
   const checkAll = () =>
     checked.update(store => {
-      const $data = get(data)
+      const $data: TData[] = get(data)
 
       if (store.length === $data.length) {
         return (store = [])
@@ -64,7 +75,7 @@ export default (initialData = [], options = {}) => {
       }
     })
 
-  const check = id =>
+  const check = (id: TData['id']) =>
     checked.update(store => {
       const index = store.indexOf(id)
 
@@ -75,7 +86,7 @@ export default (initialData = [], options = {}) => {
       }
     })
 
-  const openOrSelect = type => id => {
+  const openOrSelect = (type: 'open' | 'select') => (id: TData['id']) => {
     const store = type === 'open' ? opened : selected
 
     store.update(store => {
@@ -91,7 +102,9 @@ export default (initialData = [], options = {}) => {
     })
   }
 
-  const setSort = column => ({ shiftKey } = {}) =>
+  const setSort = (column: keyof TData) => ({
+    shiftKey
+  }: { shiftKey?: MouseEvent['shiftKey'] } = {}) =>
     sort.update(store => {
       const index = store.findIndex(item => item[0] === column)
       const reverse =
