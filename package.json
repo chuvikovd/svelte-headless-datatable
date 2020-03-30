@@ -1,6 +1,6 @@
 {
   "name": "svelte-headless-datatable",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "Headless Svelte 3 datatable",
   "author": "Dmitrijs Čuvikovs <chuvikovd@gmail.com> (https://chuva.dev)",
   "repository": "https://github.com/chuvikovd/svelte-headless-datatable",
@@ -26,7 +26,8 @@
     "svelte": ">=3.20.0"
   },
   "dependencies": {
-    "multi-column-sort": "^2.1.0"
+    "multi-column-sort": "^2.1.0",
+    "tslib": "^1.11.1"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^3.1.1",
@@ -43,7 +44,6 @@
     "standard": "^14.3.3",
     "svelte": "^3.0.0",
     "ts-jest": "^25.2.1",
-    "tslib": "^1.11.1",
     "typedoc": "^0.17.3",
     "typescript": "^3.8.3",
     "wait-for-expect": "^3.0.2"
