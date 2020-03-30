@@ -1,0 +1,4 @@
+.circleci
+coverage
+dist
+docs

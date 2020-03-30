@@ -1,6 +1,6 @@
 {
   "name": "svelte-headless-datatable",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Headless Svelte 3 datatable",
   "author": "Dmitrijs Čuvikovs <chuvikovd@gmail.com> (https://chuva.dev)",
   "repository": "https://github.com/chuvikovd/svelte-headless-datatable",
@@ -11,10 +11,11 @@
     "typescript"
   ],
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "rollup -c && tsc --emitDeclarationOnly",
     "format": "prettier-standard --format",
     "lint": "prettier-standard --lint",
     "test": "jest",
@@ -28,15 +29,21 @@
     "multi-column-sort": "^2.1.0"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^3.1.1",
     "@types/jest": "^25.1.4",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
     "prettier-config-standard": "^1.0.1",
     "prettier-standard": "^16.2.1",
     "rimraf": "^3.0.2",
+    "rollup": "^2.3.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-svelte": "^5.2.0",
     "standard": "^14.3.3",
     "svelte": "^3.0.0",
     "ts-jest": "^25.2.1",
+    "tslib": "^1.11.1",
     "typedoc": "^0.17.3",
     "typescript": "^3.8.3",
     "wait-for-expect": "^3.0.2"
