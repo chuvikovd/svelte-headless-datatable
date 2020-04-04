@@ -1,5 +1,5 @@
 import { derived, get, writable } from 'svelte/store'
-import multiColumnSort from 'multi-column-sort'
+import multiColumnSort, { SortArray } from 'multi-column-sort'
 import { TDefaultData, Datatable, Options } from './types'
 
 /**
@@ -9,22 +9,26 @@ const getDefaultOptions = <TData extends TDefaultData>(): Options<TData> => ({
   openMultiple: false,
   selectMultiple: false,
   itemsPerPage: 10,
-  getItems: (page, { data, itemsPerPage }) =>
-    data.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
+  resetOnPageChange: [],
+  getItems: ({ data, page, itemsPerPage }) => ({
+    items: data.slice(page * itemsPerPage, (page + 1) * itemsPerPage),
+    totalPages: Math.ceil(data.length / itemsPerPage)
+  })
 })
 
 /**
  * Initialize datatable
- * @param initialData data. Pass [] if async
+ * @param data pass [] if async
  * @param options configuration object
  */
 export default function createDatatable<
   TData extends TDefaultData = TDefaultData
-> (initialData: TData[] = [], options: Options<TData> = {}): Datatable<TData> {
+> (data: TData[], options: Options<TData> = {}): Datatable<TData> {
   const {
     openMultiple,
     selectMultiple,
     itemsPerPage,
+    resetOnPageChange,
     getItems,
     getColumnValue
   } = {
@@ -33,45 +37,49 @@ export default function createDatatable<
   }
 
   const sort = writable<[keyof TData, 'ASC' | 'DESC'][]>([])
-  const data = derived(
-    sort,
-    ($sort, set) => {
-      if (!$sort.length) return set(initialData)
-
-      set(multiColumnSort(initialData, $sort, getColumnValue))
-    },
-    initialData
-  )
   const checked = writable<string[]>([])
   const allChecked = derived(
-    [checked, data],
-    ([$checked, $data]) => $checked.length === $data.length
+    checked,
+    $checked => $checked.length === data.length
   )
   const opened = writable<string[]>([])
   const selected = writable<string[]>([])
-  const loading = writable(options.getItems ? true : false)
+  const loading = writable(false)
   const page = writable(0)
-  const pages = derived(data, $data => Math.ceil($data.length / itemsPerPage))
+  const pages = writable(Math.ceil(data.length / itemsPerPage))
   const items = derived(
-    [page, data],
-    (async ([$page, $data], set) => {
-      loading.set(true)
+    [page, sort],
+    ([$page, $sort], set) => {
+      const sorted = sortData(data, $sort)
+      const maybePromise = getItems({
+        page: $page,
+        itemsPerPage,
+        sort: $sort,
+        data: sorted
+      })
 
-      const result = await getItems($page, { data: $data, itemsPerPage })
-      loading.set(false)
-      set(result as TData[])
-    }) as any,
-    initialData
+      if (maybePromise instanceof Promise) {
+        loading.set(true)
+        maybePromise.then(({ totalPages, items }) => {
+          loading.set(false)
+          set(items)
+          pages.set(totalPages)
+        })
+      } else {
+        const { totalPages, items } = maybePromise
+        set(items)
+        pages.set(totalPages)
+      }
+    },
+    []
   )
 
   const checkAll = () =>
     checked.update(store => {
-      const $data: TData[] = get(data)
-
-      if (store.length === $data.length) {
+      if (store.length === data.length) {
         return (store = [])
       } else {
-        return (store = $data.map(({ id }) => id))
+        return (store = data.map(({ id }) => id))
       }
     })
 
@@ -125,6 +133,22 @@ export default function createDatatable<
       }
     })
 
+  const setPage = (newPage: number) => {
+    if (resetOnPageChange.includes('checked')) checked.set([])
+    if (resetOnPageChange.includes('opened')) opened.set([])
+    if (resetOnPageChange.includes('selected')) selected.set([])
+
+    if (newPage < 0 || newPage > get(pages) - 1) return
+
+    page.set(newPage)
+  }
+
+  const sortData = (data: TData[], sort: SortArray<TData>) => {
+    if (!sort.length) return data
+
+    return multiColumnSort(data, sort, getColumnValue)
+  }
+
   return {
     checked,
     allChecked,
@@ -135,7 +159,10 @@ export default function createDatatable<
     selected,
     select: openOrSelect('select'),
     loading,
-    page,
+    page: {
+      ...page,
+      set: setPage
+    },
     pages,
     items,
     sort,

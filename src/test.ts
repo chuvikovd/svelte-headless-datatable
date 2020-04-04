@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
 import waitForExpect from 'wait-for-expect'
 import initDatatable from '.'
-import { Datatable } from './types'
+import { Datatable, Options, GetItemsReturnType } from './types'
 import data from './data.json'
 
 describe('datatable', () => {
@@ -134,6 +134,16 @@ describe('datatable', () => {
   })
 
   describe('pagination', () => {
+    it('cannot set page < 0 or > pages', () => {
+      const { page } = datatable
+
+      page.set(-1)
+      expect(get(page)).toBe(0)
+
+      page.set(3)
+      expect(get(page)).toBe(0)
+    })
+
     test('items store', async () => {
       const { page, items } = datatable
 
@@ -182,6 +192,36 @@ describe('datatable', () => {
 
         expect(get(pages)).toBe(3)
       })
+    })
+
+    describe('resetOnPageChange', () => {
+      ;(['checked', 'opened', 'selected'] as Options<
+        Data
+      >['resetOnPageChange']).forEach(property =>
+        describe(property, () => {
+          ;[true, false].forEach(value =>
+            test(String(value), async () => {
+              datatable = initDatatable(data, {
+                resetOnPageChange: value ? [property] : []
+              })
+
+              const state = datatable[property]
+              const method = datatable[property.replace('ed', '')]
+              const { page, items } = datatable
+
+              const { id } = get(items)[0]
+
+              method(id)
+              expect(get(state)).toEqual([id])
+
+              page.set(1)
+              await waitForExpect(() => {
+                expect(get(state)).toEqual(value ? [] : [id])
+              }, 1)
+            })
+          )
+        })
+      )
     })
   })
 
@@ -255,6 +295,9 @@ describe('datatable', () => {
       await waitForExpect(() => {
         expect(get(items)).toEqual([data[1], data[3], data[0], data[2]])
       }, 1)
+
+      setSort('firstName')()
+      expect(get(sort)).toEqual([['firstName', 'ASC']])
     })
 
     describe('with shift', () => {
@@ -307,38 +350,49 @@ describe('datatable', () => {
   })
 
   describe('async', () => {
-    const getData = ({ offset, limit }): Promise<Data[]> =>
+    const getData = ({ offset, limit }): Promise<GetItemsReturnType<Data>> =>
       new Promise(resolve =>
-        setTimeout(() => resolve(data.slice(offset, offset + limit)), 500)
+        setTimeout(
+          () =>
+            resolve({
+              items: data.slice(offset, offset + limit),
+              totalPages: Math.ceil(data.length / limit)
+            }),
+          500
+        )
       )
 
     beforeEach(() => {
-      datatable = initDatatable(data, {
+      datatable = initDatatable([], {
         itemsPerPage: 7,
-        getItems: (page, { itemsPerPage }) =>
+        getItems: ({ page, itemsPerPage }) =>
           getData({ offset: page * itemsPerPage, limit: itemsPerPage })
       })
     })
 
-    it('loads items on page change', () => {
-      const { page, items, loading } = datatable
+    it('loads items on page change', async () => {
+      const { page, pages, items, loading } = datatable
 
       expect(get(page)).toBe(0)
-      expect(get(loading)).toBe(true)
-
-      setTimeout(() => {
+      expect(get(items).length).toBe(0)
+      await waitForExpect(() => {
+        expect(get(loading)).toBe(true)
+      }, 1)
+      await waitForExpect(() => {
         expect(get(loading)).toBe(false)
         expect(get(items)).toEqual(data.slice(0, 7))
+        expect(get(pages)).toBe(3)
       }, 501)
 
       page.set(1)
 
       expect(get(page)).toBe(1)
-      setTimeout(() => {
+      await waitForExpect(() => {
         expect(get(loading)).toBe(true)
       }, 1)
-      setTimeout(() => {
+      await waitForExpect(() => {
         expect(get(items)).toEqual(data.slice(7, 14))
+        expect(get(pages)).toBe(3)
       }, 501)
     })
   })

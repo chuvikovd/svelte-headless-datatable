@@ -81,8 +81,15 @@ export interface Datatable<TData extends TDefaultData = TDefaultData> {
 }
 
 export interface GetItemsArgs<TData> {
-  data?: TData[]
+  page: number
   itemsPerPage: number
+  sort: SortArray<TData>
+  data?: TData[]
+}
+
+export interface GetItemsReturnType<TData> {
+  totalPages: number
+  items: TData[]
 }
 
 /**
@@ -91,9 +98,8 @@ export interface GetItemsArgs<TData> {
  * @param getItemArgs object: `GetItemArgs`
  */
 export type GetItems<TData> = (
-  page: number,
-  { data, itemsPerPage }: GetItemsArgs<TData>
-) => TData[] | Promise<TData[]>
+  args: GetItemsArgs<TData>
+) => GetItemsReturnType<TData> | Promise<GetItemsReturnType<TData>>
 
 /**
  * Configuration options object
@@ -115,6 +121,10 @@ export interface Options<TData extends TDefaultData> {
    * Method to get current page items. Can be async.
    */
   getItems?: GetItems<TData>
+  /**
+   * Reset checked, opened, selected on page change.
+   */
+  resetOnPageChange?: ('checked' | 'opened' | 'selected')[]
   /**
    * Method for retrieving column value for comparison.
    * See https://github.com/chuvikovd/multi-column-sort

@@ -25,7 +25,7 @@ $ yarn add svelte-headless-datatable
 ```html
 <script>
   import createDatatable from 'svelte-headless-datatable'
-  
+
   const data = [
     {
       'id': '5e837815fcd5249efa8e4d85',
